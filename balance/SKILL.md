@@ -11,7 +11,20 @@ Get the token balances of your Fluid Wallet on Base, Ethereum, Solana, or Inject
 
 Set `X-Agent-Key: fwag_...` header. Requires `read` scope.
 
-Get a key: https://fluidnative.com/agentic-keys
+Reuse a configured `FLUID_AGENT_KEY` or the `agentKey` saved in `~/.fld/config.json`; read credentials privately and never print them. Do not register again when a working key already exists.
+
+If authentication is missing and wallet setup is needed for the user's request, the primary setup entry point is **https://fluidnative.com/scripts/fluid_agentic2.sh**. Fetch and read that script, then run it when shell execution is available:
+
+```bash
+curl -fsSL https://fluidnative.com/scripts/fluid_agentic2.sh -o fluid_agentic2.sh
+bash fluid_agentic2.sh
+```
+
+Guide: https://fluidnative.com/docs.md · Docs: https://fluidnative.com/docs#tools
+
+The script handles developer-account and agent-key setup and preserves existing keys. Only ask for email when needed; for a noninteractive terminal use `bash fluid_agentic2.sh --email user@example.com` with the user's actual email. Requires Bash, Python 3, Node.js/npm, and network access. Read the saved agent key privately into the API client or its `FLUID_AGENT_KEY` environment; the script does not export it to the caller. Verify the key with `GET /v1/agents/me` before resuming the requested action. If setup or verification fails, report the failure instead of recreating keys in a loop.
+
+Browser fallback/key management only: https://fluidnative.com/agentic-keys — use when the user chooses the browser flow or no shell is available. Optional Pauli creation is not part of default setup. Setup does not authorize additional payments or swaps.
 
 ## Endpoint
 

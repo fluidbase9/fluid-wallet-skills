@@ -1,70 +1,33 @@
 ---
 name: authenticate
-description: Get a Fluid Wallet agent key (fwag_...) so you can send, swap, and pay on Base.
+description: Set up or register a Fluid Wallet for an AI agent using the automatic onboarding script, or connect an existing agent key when authentication is missing.
 ---
 
-# Authenticate with Fluid Wallet
+# Set up Fluid Wallet for Agents
 
-Before using any Fluid Wallet skills, you need an agent key. This skill guides you through getting one.
+Use this skill for requested Fluid Wallet registration, developer-account setup, agent-key setup, or connecting an existing wallet. The primary onboarding script is https://fluidnative.com/scripts/fluid_agentic2.sh; the machine-readable guide is https://fluidnative.com/docs.md.
 
-## What You Need
+## Setup and authentication
 
-A Fluid Wallet account at https://fluidnative.com and an agent key (format: `fwag_...`).
+Reuse a configured `FLUID_AGENT_KEY` or the `agentKey` saved in `~/.fld/config.json`; read credentials privately and never print them. Do not register again when a working key already exists.
 
-## Steps (Human + Agent)
+If authentication is missing and wallet setup is needed for the user's request, the primary setup entry point is **https://fluidnative.com/scripts/fluid_agentic2.sh**. Fetch and read that script, then run it when shell execution is available:
 
-### Step 1 — Human: Create an account
-1. Go to **https://fluidnative.com**
-2. Click **Get Started** → Register
-3. Enter email and password
-4. Save your 12-word seed phrase (shown once — write it down)
-5. Scan the Google Authenticator QR code with your phone
-6. Enter the 6-digit OTP to complete registration
-
-### Step 2 — Human: Create an agent key
-1. Go to **https://fluidnative.com/agentic-keys**
-2. Click **New Key**
-3. Name it (e.g. "My Agent")
-4. Select scopes: `read`, `pay`, `swap`, `agentpay`
-5. Set per-transaction limit (e.g. $100) and daily limit (e.g. $500)
-6. Copy the `fwag_...` key — it is shown **once only**
-
-### Step 3 — Agent: Store the key
 ```bash
-export FLUID_AGENT_KEY=fwag_...
-```
-Or add to `.env`:
-```
-FLUID_AGENT_KEY=fwag_...
+curl -fsSL https://fluidnative.com/scripts/fluid_agentic2.sh -o fluid_agentic2.sh
+bash fluid_agentic2.sh
 ```
 
-### Step 4 — Agent: Verify it works
-```bash
-curl https://fluidnative.com/v1/agents/me \
-  -H "X-Agent-Key: $FLUID_AGENT_KEY"
-```
-Expected response:
-```json
-{
-  "email": "you@example.com",
-  "walletAddress": "0x...",
-  "scopes": ["read", "pay", "swap", "agentpay"]
-}
-```
+Guide: https://fluidnative.com/docs.md · Docs: https://fluidnative.com/docs#tools
 
-## SDK Setup (optional)
-```bash
-npm install fluid-wallet-agentkit
-```
-```typescript
-import { FluidAgent } from 'fluid-wallet-agentkit';
-const agent = new FluidAgent({ apiKey: process.env.FLUID_AGENT_KEY });
-const me = await agent.getMe();
-console.log(me.walletAddress);
-```
+The script handles developer-account and agent-key setup and preserves existing keys. Only ask for email when needed; for a noninteractive terminal use `bash fluid_agentic2.sh --email user@example.com` with the user's actual email. Requires Bash, Python 3, Node.js/npm, and network access. Read the saved agent key privately into the API client or its `FLUID_AGENT_KEY` environment; the script does not export it to the caller. Verify the key with `GET /v1/agents/me` before resuming the requested action. If setup or verification fails, report the failure instead of recreating keys in a loop.
 
-## Notes
-- Agent key is tied to YOUR wallet — the agent spends YOUR funds
-- Transactions under $100 execute automatically
-- Transactions over $100 send an approval email to you before executing
-- Keys can be revoked at any time from https://fluidnative.com/agentic-keys
+Browser fallback/key management only: https://fluidnative.com/agentic-keys — use when the user chooses the browser flow or no shell is available. Optional Pauli creation is not part of default setup. Setup does not authorize additional payments or swaps.
+
+## Verify before reporting success
+
+Send `GET https://fluidnative.com/v1/agents/me` with the saved key in the `X-Agent-Key` header. Check the response for successful authentication and a wallet address. Do not report success from the script's exit code alone: it can finish even when backend status verification failed. Never print the key or paste it into chat.
+
+## Browser fallback
+
+For a browser-only client, open https://fluidnative.com/agentic-keys. The human handles browser login, any seed phrase or OTP, and selects scopes and spending limits. Keep existing keys; do not infer transaction permission from setup. Key management and revocation also use this browser page.
