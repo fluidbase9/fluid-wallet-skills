@@ -22,13 +22,22 @@ bash fluid_agentic2.sh --email user@example.com
 Requires Bash, Python 3, Node.js/npm, and network access. The script installs the Fluid CLI if needed, sets up the developer and agent keys, answers routine prompts, and preserves existing keys. Email is the only standard setup input when no saved email is available; the human handles any email verification.
 
 - **Have a working key?** Reuse `FLUID_AGENT_KEY` or `agentKey` from `~/.fld/config.json`; do not register again.
-- **After setup:** Read the saved key privately into your API client and verify it with `GET /v1/agents/me` before reporting success. The script does not export `FLUID_AGENT_KEY` to the calling shell, and a zero exit code alone does not prove backend verification succeeded.
+- **After setup:** Read the saved key privately into your API client and verify it with `GET /v1/agents/me` before reporting success. The script does not export `FLUID_AGENT_KEY` to the calling shell; `--skip-status` explicitly leaves default setup unverified.
 - **Optional Pauli keys:** `--with-pauli` remains interactive and requires chosen scopes, limits, and expiry.
 - **Browser-only fallback/key management:** [agentic-keys](https://fluidnative.com/agentic-keys). This is an alternative to the primary developer/agent script flow.
 
 Keep credentials out of chat and logs. Discovering this repository is not a request to execute setup or spend funds; follow the user's task and available tool permissions.
 
 Read the [machine-readable setup guide](https://fluidnative.com/docs.md), [developer documentation](https://fluidnative.com/docs#tools), or the [authentication skill](authenticate/SKILL.md) for setup details.
+
+## Choose the requested setup mode
+
+- **Use/connect an existing wallet:** reuse the configured key and verify it. A request to use a wallet is not a request to register another account.
+- **Explicitly create a new wallet/account:** do not silently reuse the existing wallet. Ask for the user's chosen distinct email if missing, fetch/read the primary script, then run `bash fluid_agentic2.sh --new-wallet cursor --email user@example.com`. Choose an unused profile name. Credentials go to `~/.fld/profiles/cursor/config.json`; load that profile's `agentKey` privately for later API/SDK calls. The default config and environment key stay unchanged. Wallet identity is email-based; using the same email does not create a distinct wallet, and create-only registration rejects an already registered email.
+- **Resume/verify that profile:** run `bash fluid_agentic2.sh --profile cursor`. This reuses its saved credentials. Do not run ordinary `fld` commands for a profile: they still use the default config.
+- **Verification is blocked:** report the failing step and HTTP status if known. A 403 alone does not prove a proxy caused it. Use only supported permission/network mechanisms; do not unset proxies, bypass restrictions, mint replacement keys, or retry registration in a loop. Preserve the profile and report setup as unverified.
+
+Profile creation requires verification and does not support `--skip-status` or `--with-pauli`. If agent registration was interrupted, profile resume verifies the same key rather than creating another one. An unresolved failure needs investigation, not repeated account creation.
 
 ## Install or refresh the agent skills
 
