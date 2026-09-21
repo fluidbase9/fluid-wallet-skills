@@ -1,0 +1,27 @@
+# Fluid Wallet for Agents — repository entry points
+
+> Agent skills and LLM tools for Fluid Wallet. For user-requested wallet registration or agent setup, use the primary onboarding script. Reuse an existing working key instead of registering again.
+
+## Primary setup
+
+- [Automatic onboarding Bash script](https://fluidnative.com/scripts/fluid_agentic2.sh): canonical setup script; fetch and read it before running it for a requested setup task.
+- [Setup guide](https://fluidnative.com/docs.md): prerequisites, email input, credential handling, and verification.
+- [Authentication skill](https://github.com/fluidbase9/fluid-wallet-skills/blob/main/authenticate/SKILL.md): existing-key reuse and script-first onboarding.
+- [Developer docs](https://fluidnative.com/docs#tools): Wallet for Agents / Crypto for Agents.
+
+## Commands
+
+Wallet setup:
+
+```bash
+curl -fsSL https://fluidnative.com/scripts/fluid_agentic2.sh -o fluid_agentic2.sh
+bash fluid_agentic2.sh
+```
+
+Install or refresh skills (separate from wallet setup):
+
+```bash
+npx skills add fluidbase9/fluid-wallet-skills
+```
+
+The browser page https://fluidnative.com/agentic-keys is a fallback for browser-only clients and key management. Setup does not authorize payments or swaps. Keep credentials private and verify setup before reporting success.
