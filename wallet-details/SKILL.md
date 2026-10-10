@@ -22,3 +22,32 @@ Do not expose credential hashes, signing keys, raw agent credentials or local se
 ## Required completion summary
 After registration, query fluid_me and fluid_balance (or the equivalent authenticated API calls) and present a readable wallet table: profile/agent type, contact email and verification, username, public agentId or pending naming status, wallet address, provider/custody, network name, chain ID/type, gas token, ETH/USDC token names/types/decimals, USDC contract, scopes/capabilities, live balances and check timestamp, and explorer link. If a balance lookup fails, report unavailable; registration may still be verified. Gas balance is not a transaction fee estimate.
 A request for "full ID" means the public agent ID or wallet address, never the private fwag_local_ API credential. Do not suggest revealing a secret to answer an identity question. If agentId is absent, report the returned naming status; do not invent an ENS registration.
+
+
+## Default wallet creation report
+After every successful new-wallet registration or resume, return a short verified-status sentence followed by a two-column Markdown table (Field | Value). Do not wait for the user to request details. Include every row below, using the current profile and authenticated responses, never sample values:
+
+| Field | Value source |
+| --- | --- |
+| Profile | Selected local profile |
+| Agent type | Identity agentType; unavailable if absent |
+| Contact email | contactEmail and emailVerified |
+| Username | username; note that the email alias is not unique |
+| Public agent ID | agentId or not assigned |
+| Naming status | naming.status or unavailable |
+| ENS resolution | naming.ensResolution; distinguish a usable payment name from a pending name |
+| Wallet address | Verified walletAddress |
+| Provider | Identity provider |
+| Custody | Identity custody and signing model |
+| Network | network.name |
+| Chain ID / type | network.chainId and network.architecture |
+| Gas token | Native token name, symbol, type and decimals |
+| USDC | Token name, type, decimals and contract address |
+| Scopes | Identity scopes |
+| Capabilities | Enabled and unsupported capabilities |
+| ETH balance | Live Base ETH balance or unavailable |
+| USDC balance | Live Base USDC balance or unavailable |
+| Balance checked | Response checkedAt; otherwise label the client query time explicitly |
+| Explorer | Verified wallet address's explorer link |
+
+End with: keys stay on the device and are not included in chat; registration does not fund the wallet or authorize spending; gas balance is not a transaction fee estimate. If naming is pending, receive funds using the verified address, not the proposed name. Never interpret "full ID" as a private key. If registration fails, show a failure/pending report instead of the verified-success sentence. A failed balance request does not undo verified registration. Missing metadata must be labeled unavailable, not guessed.
