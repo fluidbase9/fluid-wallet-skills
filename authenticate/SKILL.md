@@ -1,53 +1,25 @@
 ---
 name: authenticate
-description: Set up or register a Fluid Wallet for an AI agent using the automatic onboarding script, or connect an existing agent key when authentication is missing.
+description: Create a device-owned Fluid agent wallet with one contact-email input, or resume/connect a user-selected existing wallet.
 ---
 
-## Get an Agent Wallet (browser pairing and MCP)
+# Fluid agent onboarding
 
-Start at https://fluidnative.com/agents/start. The MCP server is https://fluidnative.com/v1/mcp; call `fluid_setup` without credentials for onboarding instructions. Configure `X-Agent-Key` privately in your MCP client after setup, then call `fluid_me` and `fluid_balance`. Never paste credentials into chat or tool arguments.
+For a requested NEW wallet, ask for contact email first if it was not already provided. Use the client's free-text input tool when available, with the question: "What contact email should I use for this agent wallet?" Do not substitute a multiple-choice setup question for the email field. If no text-input tool exists, ask the same question in chat and wait for the answer. Never invent an email. A website or MCP server cannot force an input box in every client.
 
-Use the intact raw script at https://fluidnative.com/scripts/fluid_agentic2.sh. If shell network access is blocked, an existing local script can prepare pairing offline: `bash fluid_agentic2.sh --pair-wallet cursor --email USER_CHOSEN_EMAIL`. The user signs in through the generated browser link and compares the key fingerprint before approving read-only access. Complete with `bash fluid_agentic2.sh --complete-pairing cursor` when permitted network access works. Keep the same local key on failure; do not bypass proxies or reconstruct Python from browser-extracted text.
+Email is unverified contact metadata for this device-owned flow. It need not be unused; the same email may label separate wallets. Do not require email verification, password, seed phrase, or browser pairing. Do not test an unrelated environment credential as a prerequisite for creating the requested new wallet.
 
-Browser-only users can register and download a private profile at `/agents/start`, import with `--import-profile NAME --profile-file FILE`, then verify with `--profile NAME`. Never overwrite an existing profile. The same email connects to the same wallet; a separate wallet requires another verified email. `/agentic-keys` is key management, not registration. Do not silently redirect new-profile requests there.
+1. If connected, call MCP `fluid_setup` at https://fluidnative.com/v1/mcp without credentials for guidance. It returns instructions, not a newly created local wallet.
+2. Download and inspect the intact raw script:
+   `curl -fsSL https://fluidnative.com/scripts/fluid_agentic2.sh -o fluid_agentic2.sh`
+3. Run it yourself with an unused profile name and the supplied email:
+   `bash fluid_agentic2.sh --new-agent claude --email USER_EMAIL`
+   Requires Node.js 20+. Use appropriate shell quoting for user input. Examples of profile names: chatgpt, claude, cursor. Never overwrite an existing profile; resume it only when that is the requested wallet.
+4. If interrupted, preserve keys and resume the same profile with `bash fluid_agentic2.sh --resume-agent claude`. Never use legacy `--new-wallet` or `--profile` for this device-owned flow.
+5. After verified setup, configure X-Agent-Key privately from that profile, then call `fluid_me` and `fluid_balance`. Never print keys or profile contents. A private device-only key reveal is separate from chat.
+6. Report address, Base chain ID 8453, contact email verification status, naming status and current balance timestamp. A pending ENS name does not imply wallet registration failed. Hosted payments remain unsupported for this profile; no spending is authorized by setup.
 
-Browser registration/pairing grants read-only access. Confirm chain, balance, gas, recipient, amount and explicit spending scope/limits before payments. Subscriptions require a supported recurring-payment mechanism plus service, amount, frequency, cap and expiry; onboarding does not configure them.
+For an existing-wallet request, use the explicitly selected saved profile and verify it; do not create another. Browser/legacy pairing is an explicit alternative only. On continued HTTP/network errors, stop with the exact failed step; do not bypass restrictions, infer invalid credentials from every 403, or regenerate keys.
 
-
-# Set up Fluid Wallet for Agents
-
-Use this skill for requested Fluid Wallet registration, developer-account setup, agent-key setup, or connecting an existing wallet. The primary onboarding script is https://fluidnative.com/scripts/fluid_agentic2.sh; the machine-readable guide is https://fluidnative.com/docs.md.
-
-## Choose the requested setup mode
-
-- **Use/connect an existing wallet:** reuse the configured key and verify it. A request to use a wallet is not a request to register another account.
-- **Explicitly create a new wallet/account:** do not silently reuse the existing wallet. Ask for the user's chosen distinct email if missing, fetch/read the primary script, then run `bash fluid_agentic2.sh --new-wallet cursor --email user@example.com`. Choose an unused profile name. Credentials go to `~/.fld/profiles/cursor/config.json`; load that profile's `agentKey` privately for later API/SDK calls. The default config and environment key stay unchanged. Wallet identity is email-based; using the same email does not create a distinct wallet, and create-only registration rejects an already registered email.
-- **Resume/verify that profile:** run `bash fluid_agentic2.sh --profile cursor`. This reuses its saved credentials. Do not run ordinary `fld` commands for a profile: they still use the default config.
-- **Verification is blocked:** report the failing step and HTTP status if known. A 403 alone does not prove a proxy caused it. Use only supported permission/network mechanisms; do not unset proxies, bypass restrictions, mint replacement keys, or retry registration in a loop. Preserve the profile and report setup as unverified.
-
-Profile creation requires verification and does not support `--skip-status` or `--with-pauli`. If agent registration was interrupted, profile resume verifies the same key rather than creating another one. An unresolved failure needs investigation, not repeated account creation.
-
-## Setup and authentication
-
-Reuse a configured `FLUID_AGENT_KEY` or the `agentKey` saved in `~/.fld/config.json`; read credentials privately and never print them. Reuse a working key for existing-wallet tasks; explicit new-wallet requests use a separate profile as described above.
-
-If authentication is missing and wallet setup is needed for the user's request, the primary setup entry point is **https://fluidnative.com/scripts/fluid_agentic2.sh**. Fetch and read that script, then run it when shell execution is available:
-
-```bash
-curl -fsSL https://fluidnative.com/scripts/fluid_agentic2.sh -o fluid_agentic2.sh
-bash fluid_agentic2.sh
-```
-
-Guide: https://fluidnative.com/docs.md · Docs: https://fluidnative.com/docs#tools
-
-The script handles developer-account and agent-key setup and preserves existing keys. Only ask for email when needed; for a noninteractive terminal use `bash fluid_agentic2.sh --email user@example.com` with the user's actual email. Requires Bash, Python 3, Node.js/npm, and network access. Read the saved agent key privately into the API client or its `FLUID_AGENT_KEY` environment; the script does not export it to the caller. Verify the key with `GET /v1/agents/me` before resuming the requested action. If setup or verification fails, report the failure instead of recreating keys in a loop.
-
-Browser registration and pairing: https://fluidnative.com/agents/start. Existing key-management instructions: https://fluidnative.com/agentic-keys. Optional Pauli creation is not part of default setup. Setup does not authorize additional payments or swaps.
-
-## Verify before reporting success
-
-Send `GET https://fluidnative.com/v1/agents/me` with the saved key in the `X-Agent-Key` header. Check the response for successful authentication and a wallet address. Do not report success from the script's exit code alone: verification failures return a nonzero exit code; --skip-status explicitly leaves default setup unverified. Never print the key or paste it into chat.
-
-## Browser fallback
-
-For a browser-only client, open https://fluidnative.com/agents/start and follow the read-only registration or pairing flow above. Do not paste credentials into chat. Existing key management remains at /agentic-keys; setup does not configure payments or subscriptions.
+Machine-readable guide: https://fluidnative.com/docs.md
+Developer guide: https://fluidnative.com/agent-quickstart.html
