@@ -17,3 +17,8 @@ API equivalents: GET /v1/agents/me and GET /v1/agents/balance?chain=base.
 SDK: await agent.getWalletDetails() returns { identity, balances } and fails if either query fails.
 Guide: https://fluidnative.com/docs.md
 Do not expose credential hashes, signing keys, raw agent credentials or local secret file contents.
+
+
+## Required completion summary
+After registration, query fluid_me and fluid_balance (or the equivalent authenticated API calls) and present a readable wallet table: profile/agent type, contact email and verification, username, public agentId or pending naming status, wallet address, provider/custody, network name, chain ID/type, gas token, ETH/USDC token names/types/decimals, USDC contract, scopes/capabilities, live balances and check timestamp, and explorer link. If a balance lookup fails, report unavailable; registration may still be verified. Gas balance is not a transaction fee estimate.
+A request for "full ID" means the public agent ID or wallet address, never the private fwag_local_ API credential. Do not suggest revealing a secret to answer an identity question. If agentId is absent, report the returned naming status; do not invent an ENS registration.
