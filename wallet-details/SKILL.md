@@ -5,7 +5,7 @@ description: Query a Fluid agent wallet's identity, blockchain network, chain ID
 
 # Wallet details
 
-1. Reuse the user-selected existing profile. Only create a new wallet when requested; ask for contact email once and run the intact onboarding script with --new-agent NAME --email ADDRESS.
+1. Reuse the user-selected existing profile. Only create a new wallet when requested; ask only for the desired username and run the intact onboarding script with --new-agent NAME --username USERNAME.
 2. Configure X-Agent-Key privately from that profile in the MCP client. Endpoint: https://fluidnative.com/v1/mcp. Never put the credential in tool arguments, chat, or logs.
 3. Call fluid_me with {}. Report its name, address, provider, network, chain ID, custody, verification and capabilities. The configured credential selects the wallet, not a name typed into chat.
 4. Call fluid_balance with {"chain":"base"}. Report the returned ETH/USDC amounts and checkedAt timestamp separately from identity.
@@ -32,7 +32,7 @@ After every successful new-wallet registration or resume, return a short verifie
 | Profile | Selected local profile |
 | Agent type | Identity agentType; unavailable if absent |
 | Contact email | contactEmail and emailVerified |
-| Username | username; note that the email alias is not unique |
+| Username | username and usernameType; a username alone is not globally unique |
 | Public agent ID | agentId or not assigned |
 | Naming status | naming.status or unavailable |
 | ENS resolution | naming.ensResolution; distinguish a usable payment name from a pending name |
