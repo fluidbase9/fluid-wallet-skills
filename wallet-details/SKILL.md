@@ -51,3 +51,18 @@ After every successful new-wallet registration or resume, return a short verifie
 | Explorer | Verified wallet address's explorer link |
 
 End with: keys stay on the device and are not included in chat; registration does not fund the wallet or authorize spending; gas balance is not a transaction fee estimate. If naming is pending, receive funds using the verified address, not the proposed name. Never interpret "full ID" as a private key. If registration fails, show a failure/pending report instead of the verified-success sentence. A failed balance request does not undo verified registration. Missing metadata must be labeled unavailable, not guessed.
+
+
+## UAI: Unique Agent Identity and ENS naming
+
+UAI means Unique Agent Identity. UOI means Universal Onchain Identity, the broader human-wallet identity concept. A Fluid display alias, a wallet address, an API credential and an ENS name are separate things. A private API credential is never a public UAI.
+
+The agent naming hierarchy is fluidbase.eth → chatgpt.fluidbase.eth → username.chatgpt.fluidbase.eth (and equivalent dedicated claude/cursor branches). Existing human username.fluidbase.eth records stay on their existing resolution path; this pilot does not change them. Public ENS resolution of human records is not established by the application database lookup alone.
+
+The dedicated registrar/resolver pilot requires registrar authorization plus a wallet signature bound to chain, contract, parent, label, nonce and expiry. It supports direct address resolution, collision prevention, revocation and replay protection. This proves wallet control and authorized naming, not email ownership or that software is genuinely ChatGPT/Claude/Cursor. An existing human alias requires verified owner delegation before issuance.
+
+Status: four local contract tests passed against a mock ENS registry. The adapter is opt-in; no production route or transaction broadcast is enabled. No live ENS deployment or real testnet validation is claimed. The pilot assumes an unwrapped delegated branch; wrapped names need an appropriate integration. It does not implement wildcard/CCIP Read, contract-wallet signatures, multicoin records or agent messaging.
+
+Agents must query fluid_me and report agentId and naming.status. A missing ID, pending_configuration or availability_unknown must not be described as an ENS registration. paymentResolvable remains false until an authorized deployment and independent resolution verification establish otherwise. Use the verified wallet address and explicit chain for payments. Never send a signing key to a registrar or put it in tool arguments.
+
+Source and rollout: https://github.com/fluidbase9/fluidwalletbase/blob/main/docs/UAI_REGISTRAR_PILOT.md
